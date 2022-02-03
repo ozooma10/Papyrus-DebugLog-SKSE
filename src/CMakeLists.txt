@@ -4,10 +4,13 @@ set(SOURCE_DIR "${ROOT_DIR}/src")
 set(SOURCE_FILES
 	"${SOURCE_DIR}/main.cpp"
 	"${SOURCE_DIR}/PCH.h"
+	"${SOURCE_DIR}/RuntimeEvents.h"
+	"${SOURCE_DIR}/RuntimeEvents.cpp"
+	"${SOURCE_DIR}/PapyrusDebugServer.h"
 	"${SOURCE_DIR}/PapyrusDebugServer.cpp"
-	"${SOURCE_DIR}/DebugSession.cpp"
+	"${SOURCE_DIR}/PapyrusDebugger.h"
 	"${SOURCE_DIR}/PapyrusDebugger.cpp"
-	"${SOURCE_DIR}/RuntimeEvents.cpp" "content_stream.h")
+ )
 
 source_group(TREE "${ROOT_DIR}" FILES ${SOURCE_FILES})
 
@@ -52,8 +55,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
 			"/permissive-"	# Standards conformance
 			"/Zc:preprocessor"	# Enable preprocessor conformance mode
-			"/W0"
+
 			"/wd4200" # nonstandard extension used : zero-sized array in struct/union
+
+			"/W0"
 
 			"$<$<CONFIG:DEBUG>:>"
 			"$<$<CONFIG:RELEASE>:/Zc:inline;/JMC-;/Ob3>"
@@ -75,15 +80,11 @@ target_include_directories(
 )
 
 add_subdirectory("${ROOT_DIR}/external/CommonLibSSE" CommonLibSSE EXCLUDE_FROM_ALL)
-add_subdirectory("${ROOT_DIR}/external/eventpp" eventpp EXCLUDE_FROM_ALL)
-add_subdirectory("${ROOT_DIR}/external/cppdap" cppdap EXCLUDE_FROM_ALL)
 
 target_link_libraries(
 	"${PROJECT_NAME}"
 	PRIVATE
 		CommonLibSSE::CommonLibSSE
-		eventpp::eventpp
-		cppdap
 )
 
 target_precompile_headers(
@@ -106,12 +107,10 @@ install(
 	COMPONENT "pdbs"
 )
 
-if("${COPY_OUTPUT}")
-	add_custom_command(
-		TARGET "${PROJECT_NAME}"
-		POST_BUILD
-		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${Skyrim64Path}/Data/SKSE/Plugins/"
-		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${Skyrim64Path}/Data/SKSE/Plugins/"
-		VERBATIM
-	)
-endif()
+add_custom_command(
+	TARGET "${PROJECT_NAME}"
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${Skyrim64Path}/Data/SKSE/Plugins/"
+	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${Skyrim64Path}/Data/SKSE/Plugins/"
+	VERBATIM
+)

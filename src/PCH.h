@@ -6,6 +6,7 @@
 #include <SKSE/SKSE.h>
 
 #include <spdlog/sinks/basic_file_sink.h>
+
 #pragma warning(pop)
 
 using namespace std::literals;
